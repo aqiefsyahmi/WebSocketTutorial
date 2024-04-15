@@ -1,0 +1,69 @@
+<h1>Client Update</h1>
+<div id="alert"></div>
+<input type="text" id="txt" />
+<button onclick="send2server();">Send</button>
+<div>
+  <button onclick="StartWebCam();">Open Webcam</button>
+  <video width="200" height="200" autoplay="true" id="video"></video>
+</div>
+
+<script>
+  var websocket = new WebSocket("ws://192.168.0.17:1234/");
+  websocket.onopen = onOpen;
+  websocket.onclose = onClose;
+  websocket.onmessage = onMessage;
+  websocket.onerror = onError;
+
+  function onOpen() {
+    document.getElementById("alert").innerHTML = "Connected";
+  }
+
+  function onClose() {
+    document.getElementById("alert").innerHTML = "Close";
+  }
+
+  function onMessage(evt) {
+    var data = evt.data;
+    // document.getElementById("alert").innerHTML += "Received: " + data + "<br>";
+  }
+
+  function onError() {
+    document.getElementById("alert").innerHTML = "Error";
+  }
+
+  function send2server() {
+    var data = document.getElementById("txt").value;
+    websocket.send(data);
+  }
+
+  function StartWebCam() {
+    try {
+      var result = navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+      });
+      result.then(
+        function (stream) {
+          video.srcObject = stream;
+          setInterval(Send, 100);
+        },
+        function (error) {
+          console.log(error);
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  function Send() {
+    var canvas = document.createElement("canvas");
+    canvas.width = video.width;
+    canvas.height = video.height;
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    document.getElementById("alert").innerHTML = "Updating media..";
+    var data = canvas.toDataURL("image/jpeg", 0.8);
+    websocket.send(data);
+  }
+</script>

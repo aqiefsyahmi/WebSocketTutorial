@@ -1,0 +1,28 @@
+<div id="alert"></div>
+
+<img id="video" />
+
+<script>
+  var websocket = new WebSocket("ws://192.168.0.17:1234/");
+  websocket.onopen = onOpen;
+  websocket.onclose = onClose;
+  websocket.onmessage = onMessage;
+  websocket.onerror = onError;
+
+  function onOpen() {
+    document.getElementById("alert").innerHTML = "Connected";
+  }
+
+  function onClose() {
+    document.getElementById("alert").innerHTML = "Close";
+  }
+
+  function onMessage(evt) {
+    var data = evt.data;
+    document.getElementById("video").src = data;
+  }
+
+  function onError() {
+    document.getElementById("alert").innerHTML = "Error";
+  }
+</script>
